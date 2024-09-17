@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL Connection Example</title>
+</head>
+<body>
+<h1>MySQL Connection Example</h1>
+
+<!-- Formulář pro přidání uživatele -->
+<form id="addUserForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+    <button type="submit">Add User</button>
+</form>
+
+<div id="data"></div>
+
+<script>
+    // Funkce pro načtení uživatelů
+    function loadUsers() {
+        fetch('/users')
+            .then(response => response.json())
+            .then(data => {
+                const dataDiv = document.getElementById('data');
+                dataDiv.innerHTML = '<ul>' + data.map(user => `<li>${user.name}</li>`).join('') + '</ul>';
+            });
+    }
+
+    // Načti uživatele při načtení stránky
+    loadUsers();
+
+    // Zpracování odeslání formuláře
+    document.getElementById('addUserForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Zamez odeslání formuláře
+
+        const name = document.getElementById('name').value;
+
+        fetch('/add-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name })
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    loadUsers(); // Načti uživatele znovu
+                    document.getElementById('name').value = ''; // Vymaž formulář
+                } else {
+                    alert('Error adding user: ' + result.error);
+                }
+            });
+    });
+</script>
+</body>
+</html>
